@@ -7,117 +7,259 @@
         <title>Awraq BookStore</title>  
         <link href="awraq.css" rel="stylesheet"/>
         <script src="https://kit.fontawesome.com/92d70a2fd8.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Literata">
         
     </head>
     <body>
         <script src="book_store.js"></script>
-  
     <header class="header">
-  <div class="header-left">
-    <span class="Category">CATEGORY</span>
-    <h1 class="Books">BOOKS</h1>
-    <div class="filters">
-      <button class="filter-btn">TAGS</button>
-      <button class="filter-btn">SORT BY</button>
-    </div>
-  </div>
-  
-  <div class="cart">
+        <div class="header-left">
+            <span class="Category">CATEGORY</span>
+            <h1 class="Books">BOOKS</h1>
+            <div class="filters">
+                <button class="filter-btn">TAGS</button>
+                <button class="filter-btn">SORT BY</button>
+            </div>
+        </div>
+
+
+  <div class="cart" onclick="openCart()">
+    
     <i class="fa-solid fa-cart-shopping"></i>
     <p id="count">0</p>
   </div>
-  </header>
 
-   <section id="containers">
+  <div class="cart-overlay" onclick="closeCart()"></div>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-sidebar-header">
+            <h3 class="cart-sidebar-title">Shopping Cart</h3>
+            <button class="close-btn" onclick="closeCart()">
+                
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+
+        <div class="cart-sidebar-content" id="cartContent">
+            <!-- Cart items will be dynamically inserted here -->
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total: </span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+</header>
+
+    <section id="containers">
       
-    <div class="page-grid" ><!--class="gallery"-->
+    <div class="page-grid" >
 
-        <div class="container">
-            <img id=book src="jannat_kai_pattay.png">
-            <div class="content">
-                <h3>Jannat kai Pattay</h3>
-                <img class ="price_image" src="1200.png">
+
+            <div class="container" onclick="openView('جنت کے پتے', 'jannat_kai_pattay2.png', 'Rs 1200', 'نمرہ احمد', 'ایک دلچسپ کہانی جو محبت، دوستی اور زندگی کے مختلف پہلوؤں کو بیان کرتی ہے۔')">
+                <img id="book" src="jannat_kai_pattay2.png" alt="Book Cover">
+                <div class="content">
+                    <h3>Jannat Kai Pattay</h3>
+                   <p id="price">Rs 1500</p>
+                </div>
+            </div>
+            
+            <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+                <img id="book" src="mala.png" alt="Book Cover">
+                <div class="content">
+                    <h3>Mala</h3>
+                    <p id="price">Rs 1200</p>
+                    
+                </div>
+            </div>
+    
+
+         <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="HumRaaz Dairy.webp">
+             <div class="content">
+                <h3>ہم راز ڈائری</h3>
+                 <p id="price">Rs 1800</p>
             </div>
         </div>
 
+         <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Musawar Journal.webp">
+             <div class="content">
+                <h3>مصّور جرنل</h3>
+                <p id="price">Rs 1100</p>
+            </div>
+        </div>
 
-        <div class="container">
-            <img id=book src="anmol.png">
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+            <img id=book src="anmol_g.png">
             <div class="content">
                 <h3>Mai Anmol</h3>
-                <img class ="price_image" src="1200.png">
+                <p id="price">Rs 2100</p>
             </div>
         </div>
 
-        <div class="container">
-             <img id=book src="homegirl_w.png">
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Tabeer Planner.webp"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>تعبیر پلینر</h3>
+                <p id="price">Rs 1900</p>
+            </div>
+        </div>
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Pocket Planner.webp">
+             <div class="content">
+                <h3>پوکیٹ پلینر</h3>
+                <p id="price">Rs 900</p>
+            </div>
+        </div>
+
+         <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="kehkashan pocket diary.webp">
+             <div class="content">
+                <h3>Kehkashan Pocket Diary</h3>
+                <p id="price">Rs 900</p>
+            </div>
+        </div>
+
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Shehad ki kahani.jpg"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>Shehad ki Kahani</h3>
+                <p id="price">Rs 1200</p>
+            </div>
+        </div>
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Suratgar planner.webp"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>سورت گار پلینر</h3>
+                <p id="price">Rs 1500</p>
+            </div>
+        </div>
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Sindh ki Kahani.jpg"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>Sindh Ki Kahani</h3>
+               <p id="price">Rs 1600</p>
+            </div>
+        </div>
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="home_girl2.jpg">
              <div class="content">
                 <h3>Home Girl</h3>
-                <img class ="price_image" src="1200.png">
+                <p id="price">Rs 1900</p>
             </div>
         </div>
+        
 
-         <div class="container">
-             <img id=book src="peer-e-kamil urdu.webp">
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="peer-e-kamil urdu.jpg"> <!---aab-ehayat-->
              <div class="content">
-                <h3>Peer e Kamil</h3>
-                <img class ="price_image" src="1200.png">
+                <h3>Peer e kamil</h3>
+               <p id="price">Rs 2400</p>
             </div>
         </div>
 
-         <div class="container">
-             <img id=book src="mala.png">
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="namal.webp"> <!---aab-ehayat-->
              <div class="content">
-                <h3>Mala</h3>
-               <img class ="price_image" src="1200.png">
+                <h3>نمل</h3>
+                <p id="price">Rs 2800</p>
             </div>
         </div>
 
-         <div class="container">
-             <img id=book src="tajMahal_b.png">
-             <div class="content">
-                <h3>Karakoram ka Taj Mahal</h3>
-                <img class ="price_image" src="1200.png">
-            </div>
-        </div>
-
-
-         <div class="container">
-             <img id=book src="mushaf.png">
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="mushaf.png"> <!---aab-ehayat-->
              <div class="content">
                 <h3>Mushaf</h3>
-                <img class ="price_image" src="1200.png">
+               <p id="price">Rs 1200</p>
             </div>
         </div>
-
-
-         <div class="container">
-             <img id=book src="aab-e-hayat_b.png">
-             <div class="content">
-                <h3>Aab e Hayat</h3>
-                <img class ="price_image" src="1200.png">
-            </div>
-        </div>
-
-        <div class="container">
-             <img id=book src="mitti.png">
+        
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="mitti.png"> <!---aab-ehayat-->
              <div class="content">
                 <h3>Mitti Ka Qarz</h3>
-                <img class ="price_image" src="1200.png">
+                <p id="price">Rs 1500</p>
             </div>
         </div>
 
-        <div class="container">
-             <img id=book src="ansoo_w.png"> <!---aab-ehayat-->
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="hussan anjam.webp"> <!---aab-ehayat-->
              <div class="content">
-                <h3>Nadamat kai Ansoo</h3>
-                <img class ="price_image" src="1200.png">
+                <h3>Hussan Anjaam</h3>
+                <p id="price">Rs 1400</p>
             </div>
         </div>
+
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="aab-e-hayat_b.png"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>Aab e Hayat</h3>
+               <p id="price">Rs 1700</p>
+            </div>
+        </div>
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="ansoo.png"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>ندامت کے آنسو</h3>
+                <p id="price">Rs 1800</p>
+            </div>
+        </div>
+
+        <div class="container" onclick="openView('مالا', 'mala.png', 'Rs 1200', 'نمرہ احمد', 'ایک اور دلچسپ ناول جو قارئین کو مسحور کر دیتا ہے۔')">
+             <img id=book src="Punjab Ki tareeqh.jpg"> <!---aab-ehayat-->
+             <div class="content">
+                <h3>پنجاب کی تاریخ</h3>
+                <p id="price">Rs 1100</p>
+            </div>
+        </div>
+
+
 
     </div>
     </div>
 </section>
+
+<!-- Modal Structure -->
+    <div id="bookModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            
+            <div class="modal-left">
+                <h1 id="modalTitle" class="book-title">Book Title</h1>
+                <div id="modalAuthor" class="book-details">Author Name</div>
+                <div id="modalPrice" class="book-price">Price</div>
+                <div id="modalDescription" class="book-description">Book description goes here...</div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
+                    <button class="btn btn-secondary" onclick="viewPreview()">Preview</button>
+                </div>
+            </div>
+            
+            <div class="modal-right">
+                <div class="book-showcase">
+                    <img id="modalBookImage" src="" alt="Book Cover">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <footer>
         
     </footer>
