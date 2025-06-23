@@ -1,196 +1,367 @@
-let cartItems = [
-            {
-                id: 1,
-                name: "Jannat kai pattay",
-                price: 1200,
-                quantity: 1,
-                image: "📚"
-            },
-            {
-                id: 2,
-                name: "Mala",
-                price: 1500,
-                quantity: 1,
-                image: "📖"
+class BookstoreCart {
+    constructor() {
+        this.cartItems = this.loadCartFromStorage();
+        this.books = []; // Will be loaded from database
+        this.initializeCart();
+    }
+
+    // Load cart from localStorage
+    loadCartFromStorage() {
+        const saved = localStorage.getItem('bookstore_cart');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    // Save cart to localStorage
+    saveCartToStorage() {
+        localStorage.setItem('bookstore_cart', JSON.stringify(this.cartItems));
+    }
+
+    // Initialize cart on page load
+    async initializeCart() {
+        await this.loadBooksFromDatabase();
+        this.updateCartCount();
+        this.updateCartTotal();
+    }
+
+    // Load books from database - UPDATED FOR MONGODB BACKEND
+    async loadBooksFromDatabase() {
+        try {
+            const response = await fetch('http://localhost:5000/api/books');
+            const books = await response.json();
+            this.books = books;
+            console.log('Books loaded from MongoDB:', books);
+        } catch (error) {
+            console.error('Error loading books:', error);
+            // Fallback to hardcoded books if API fails
+            this.books = [
+                {
+                    book_id: 1,
+                    title: 'Jannat Kai Pattay',
+                    author: 'Namrah Ahmed',
+                    price: 1200.00,
+                    cover_image_url: 'https://zanjabeelbookstore.com/cdn/shop/files/WhatsAppImage2025-04-16at19.36.34_720x.jpg?v=1744874103',
+                    stock_quantity: 10
+                },
+                {
+                    book_id: 2,
+                    title: 'Mala',
+                    author: 'Nimra Ahmed',
+                    price: 1500.00,
+                    cover_image_url: 'https://zanjabeelbookstore.com/cdn/shop/files/KHA00445_de16d2e2-622b-4846-ad84-37f1e444fe8f_720x.jpg?v=1737531798',
+                    stock_quantity: 10
+                }
+            ];
+        }
+    }
+
+    // Add item to cart
+    addToCart(bookId, quantity = 1) {
+        const book = this.books.find(b => b.book_id === bookId);
+        if (!book) {
+            alert('Book not found!');
+            return false;
+        }
+
+        // Check stock
+        if (book.stock_quantity < quantity) {
+            alert('Insufficient stock!');
+            return false;
+        }
+
+        const existingItem = this.cartItems.find(item => item.book_id === bookId);
+        
+        if (existingItem) {
+            const newQuantity = existingItem.quantity + quantity;
+            if (newQuantity > book.stock_quantity) {
+                alert('Cannot add more items than available stock!');
+                return false;
             }
-        ];
-
-        // Open cart sidebar
-        function openCart() {
-            const sidebar = document.getElementById('cartSidebar');
-            const overlay = document.querySelector('.cart-overlay');
-            
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            
-            renderCartItems();
+            existingItem.quantity = newQuantity;
+        } else {
+            this.cartItems.push({
+                book_id: bookId,
+                title: book.title,
+                author: book.author,
+                price: book.price,
+                quantity: quantity,
+                cover_image_url: book.cover_image_url,
+                added_at: new Date().toISOString()
+            });
         }
 
-        // Close cart sidebar
-        function closeCart() {
-            const sidebar = document.getElementById('cartSidebar');
-            const overlay = document.querySelector('.cart-overlay');
-            
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = 'auto'; // Restore scrolling
-        }
+        this.saveCartToStorage();
+        this.updateCartCount();
+        this.updateCartTotal();
 
-        // Render cart items
-        function renderCartItems() {
-            const cartContent = document.getElementById('cartContent');
+        return true;
+    }
+
+    // Update item quantity
+    updateQuantity(bookId, change) {
+        const item = this.cartItems.find(item => item.book_id === bookId);
+        const book = this.books.find(b => b.book_id === bookId);
+        
+        if (item && book) {
+            const newQuantity = item.quantity + change;
             
-            if (cartItems.length === 0) {
-                cartContent.innerHTML = `
-                    <div class="cart-empty">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        <p>Your cart is empty</p>
-                    </div>
-                `;
-                updateCartTotal();
+            if (newQuantity <= 0) {
+                this.removeItem(bookId);
                 return;
             }
+            
+            if (newQuantity > book.stock_quantity) {
+                alert('Cannot exceed available stock!');
+                return;
+            }
+            
+            item.quantity = newQuantity;
+            this.saveCartToStorage();
+            this.renderCartItems();
+            this.updateCartCount();
+        }
+    }
 
-            let html = '';
-            cartItems.forEach(item => {
-                html += `
-                    <div class="cart-item">
-                        <div class="item-image">
-                            ${item.image}
-                        </div>
-                        <div class="item-details">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-price">Rs${item.price.toFixed(2)}</div>
-                            <div class="quantity-controls">
-                                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
-                                <span>${item.quantity}</span>
-                                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
-                                <button class="qty-btn" onclick="removeItem(${item.id})" style="margin-left: 10px; color: red;">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
+    // Remove item from cart
+    removeItem(bookId) {
+        this.cartItems = this.cartItems.filter(item => item.book_id !== bookId);
+        this.saveCartToStorage();
+        this.renderCartItems();
+        this.updateCartCount();
+    }
+
+    // Get item quantity
+    getItemQuantity(bookId) {
+        const item = this.cartItems.find(item => item.book_id === bookId);
+        return item ? item.quantity : 0;
+    }
+
+    // Clear entire cart
+    clearCart() {
+        this.cartItems = [];
+        this.saveCartToStorage();
+        this.renderCartItems();
+        this.updateCartCount();
+    }
+
+    // Render cart items in sidebar
+    renderCartItems() {
+        const cartContent = document.getElementById('cartContent');
+        
+        if (this.cartItems.length === 0) {
+            cartContent.innerHTML = `
+                <div class="cart-empty">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <p>Your cart is empty</p>
+                </div>
+            `;
+            this.updateCartTotal();
+            return;
+        }
+
+        let html = '';
+        this.cartItems.forEach(item => {
+            html += `
+                <div class="cart-item">
+                    <div class="item-image" style="background-image: url('${item.cover_image_url}'); background-size: cover; background-position: center;">
+                    </div>
+                    <div class="item-details">
+                        <div class="item-name">${item.title}</div>
+                        <div class="item-author" style="font-size: 12px; color: #888;">by ${item.author}</div>
+                        <div class="item-price">Rs${item.price.toFixed(2)}</div>
+                        <div class="quantity-controls">
+                            <button class="qty-btn" onclick="cart.updateQuantity(${item.book_id}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="qty-btn" onclick="cart.updateQuantity(${item.book_id}, 1)">+</button>
+                            <button class="qty-btn" onclick="cart.removeItem(${item.book_id})" style="margin-left: 10px; color: red;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
+        });
+
+        cartContent.innerHTML = html;
+        this.updateCartTotal();
+    }
+
+    // Update cart count badge
+    updateCartCount() {
+        const count = this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('count').textContent = count;
+    }
+
+    // Update cart total
+    updateCartTotal() {
+        const total = this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('cartTotal').textContent = `Rs${total.toFixed(2)}`;
+    }
+
+    // CHECKOUT METHOD - UPDATED FOR MONGODB BACKEND
+    async checkout() {
+        if (this.cartItems.length === 0) {
+            alert('Your cart is empty!');
+            return;
+        }
+
+        // Get customer details
+        const customerName = prompt('Please enter your name:');
+        const customerEmail = prompt('Please enter your email:');
+        
+        if (!customerName || !customerEmail) {
+            alert('Name and email are required for checkout');
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(customerEmail)) {
+            alert('Please enter a valid email address');
+            return;
+        }
+
+        try {
+            // Prepare order data for MongoDB backend
+            const orderData = {
+                customerName: customerName.trim(),
+                customerEmail: customerEmail.trim().toLowerCase(),
+                cartItems: this.cartItems.map(item => ({
+                    book_id: item.book_id,
+                    quantity: item.quantity
+                }))
+            };
+
+            console.log('Sending checkout data:', orderData);
+
+            const response = await fetch('http://localhost:5000/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData)
             });
 
-            cartContent.innerHTML = html;
-            updateCartTotal();
-        }
-
-        // Update item quantity
-        function updateQuantity(itemId, change) {
-            const item = cartItems.find(item => item.id === itemId);
-            if (item) {
-                item.quantity += change;
-                if (item.quantity <= 0) {
-                    removeItem(itemId);
-                    return;
-                }
-                renderCartItems();
-                updateCartCount();
-            }
-        }
-
-        // Remove item from cart
-        function removeItem(itemId) {
-            cartItems = cartItems.filter(item => item.id !== itemId);
-            renderCartItems();
-            updateCartCount();
-        }
-
-        // Update cart total
-        function updateCartTotal() {
-            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            document.getElementById('cartTotal').textContent = `Rs${total.toFixed(2)}`;
-        }
-
-        // Update cart count badge
-        function updateCartCount() {
-            const count = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('count').textContent = count;
-        }
-
-        // Checkout function
-        function checkout() {
-            // Here you would typically redirect to checkout page or process payment
-        }
-
-        // Close cart when pressing Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert(`Order placed successfully!\n\nOrder ID: ${result.orderId}\nTotal: Rs${result.order.totalAmount}\n\nThank you for your purchase!`);
+                this.clearCart();
                 closeCart();
+                
+                // Optionally reload books to get updated stock
+                await this.loadBooksFromDatabase();
+            } else {
+                alert('Error placing order: ' + result.error);
+                console.error('Checkout error:', result);
             }
-        });
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Error processing checkout. Please try again.');
+        }
+    }
+}
 
-        // Initialize cart count on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCartCount();
-        });
+// Initialize cart system
+const cart = new BookstoreCart();
+
+// EXISTING FUNCTIONS - UNCHANGED
+
+// Open cart sidebar
+function openCart() {
+    const sidebar = document.getElementById('cartSidebar');
+    const overlay = document.querySelector('.cart-overlay');
     
-        function openView() {
-            const sidebar = document.getElementById('cartSidebar');
-            const overlay = document.querySelector('.cart-overlay');
-            
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            
-            renderCartItems();
-        }
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    cart.renderCartItems();
+}
 
-         let currentBook = {};
+// Close cart sidebar
+function closeCart() {
+    const sidebar = document.getElementById('cartSidebar');
+    const overlay = document.querySelector('.cart-overlay');
+    
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
 
-        function openView(title, imageSrc, price, author, description) {
-            // Store book data
-            currentBook = { title, imageSrc, price, author, description };
-            
-            // Update modal content
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalAuthor').textContent = `بذریعہ: ${author}`;
-            document.getElementById('modalPrice').textContent = price;
-            document.getElementById('modalDescription').textContent = description;
-            document.getElementById('modalBookImage').src = imageSrc;
-            
-            // Show modal with animation
-            const modal = document.getElementById('bookModal');
-            modal.style.display = 'flex';
-            setTimeout(() => {
-                modal.classList.add('active');
-            }, 10);
-            
-            // Prevent body scroll
-            document.body.style.overflow = 'hidden';
-        }
+// Updated openView function
+let currentBook = {};
 
-        function closeModal(event) {
-            // Close only if clicking overlay or close button
-            if (event && event.target !== event.currentTarget && !event.target.classList.contains('close-btn')) {
-                return;
-            }
-            
-            const modal = document.getElementById('bookModal');
-            modal.classList.remove('active');
-            
-            setTimeout(() => {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }, 300);
-        }
+function openView(title, imageSrc, price, author, description) {
+    // Find the book in our database
+    const book = cart.books.find(b => b.title === title);
+    if (book) {
+        currentBook = book;
+    } else {
+        // Fallback for hardcoded data
+        currentBook = { 
+            book_id: title === 'Jannat Kai Pattay' ? 1 : 2,
+            title, 
+            cover_image_url: imageSrc, 
+            price: parseFloat(price.replace('Rs ', '').replace(',', '')), 
+            author 
+        };
+    }
+    
+    // Update modal content
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalAuthor').textContent = `بذریعہ:${author}`;
+    document.getElementById('modalPrice').textContent = price;
+    document.getElementById('modalDescription').textContent = description;
+    document.getElementById('modalBookImage').src = imageSrc;
+    
+    // Show modal
+    const modal = document.getElementById('bookModal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+    
+    document.body.style.overflow = 'hidden';
+}
 
-        function addToCart() {
-            alert(`"${currentBook.title}" آپ کی کارٹ میں شامل کر دیا گیا!`);
-            closeModal();
-        }
+// Updated addToCart function for modal
+function addToCart() {
+    const success = cart.addToCart(currentBook.book_id, 1);
+    if (success) {
+        alert(`"${currentBook.title}" added to cart!`);
+        closeModal();
+    }
+}
 
-        function viewPreview() {
-            alert(`"${currentBook.title}" کا پیش نظارہ دکھایا جا رہا ہے...`);
-        }
+// Updated checkout function
+function checkout() {
+    cart.checkout();
+}
 
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
+// Close modal function
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget && !event.target.classList.contains('close-btn')) {
+        return;
+    }
+    
+    const modal = document.getElementById('bookModal');
+    modal.classList.remove('active');
+    
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }, 300);
+}
+
+// Close cart/modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeCart();
+        closeModal();
+    }
+});
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Bookstore cart system initialized with MongoDB backend');
+});
