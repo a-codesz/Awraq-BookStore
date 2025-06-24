@@ -143,7 +143,7 @@ app.get('/api/orders/:orderId', async (req, res) => {
     }
 });
 
-// Initialize database with sample books (POST method)
+// Initialize database with sample books
 app.post('/api/init-books', async (req, res) => {
     try {
         // Check if books already exist
@@ -177,43 +177,6 @@ app.post('/api/init-books', async (req, res) => {
     } catch (error) {
         console.error('Error initializing books:', error);
         res.status(500).json({ error: 'Failed to initialize books' });
-    }
-});
-
-// Clear and reset books (GET method - works in browser)
-app.get('/api/reset-books', async (req, res) => {
-    try {
-        // Delete all existing books
-        await Book.deleteMany({});
-        
-        // Add your 2 books
-        const yourBooks = [
-            {
-                book_id: 1,
-                title: 'Jannat Kai Pattay',
-                author: 'Namrah Ahmed',
-                price: 1200.00,
-                cover_image_url: 'https://zanjabeelbookstore.com/cdn/shop/files/WhatsAppImage2025-04-16at19.36.34_720x.jpg?v=1744874103',
-                stock_quantity: 10
-            },
-            {
-                book_id: 2,
-                title: 'Mala',
-                author: 'Nimra Ahmed',
-                price: 1500.00,
-                cover_image_url: 'https://zanjabeelbookstore.com/cdn/shop/files/KHA00445_de16d2e2-622b-4846-ad84-37f1e444fe8f_720x.jpg?v=1737531798',
-                stock_quantity: 10
-            }
-        ];
-
-        await Book.insertMany(yourBooks);
-        res.json({ 
-            message: 'Database cleared and your books added successfully!',
-            books: yourBooks 
-        });
-    } catch (error) {
-        console.error('Error resetting books:', error);
-        res.status(500).json({ error: 'Failed to reset books' });
     }
 });
 
