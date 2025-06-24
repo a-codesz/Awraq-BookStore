@@ -23,7 +23,7 @@ class BookstoreCart {
         this.updateCartTotal();
     }
 
-    // Load books from database - UPDATED FOR MONGODB BACKEND
+    // Load books from database
     async loadBooksFromDatabase() {
         try {
             const response = await fetch('http://localhost:5000/api/books');
@@ -32,29 +32,10 @@ class BookstoreCart {
             console.log('Books loaded from MongoDB:', books);
         } catch (error) {
             console.error('Error loading books:', error);
-            // Fallback to hardcoded books if API fails
-            this.books = [
-                {
-                    book_id: 1,
-                    title: 'Jannat Kai Pattay',
-                    author: 'Namrah Ahmed',
-                    price: 1200.00,
-                    cover_image_url: 'https://zanjabeelbookstore.com/cdn/shop/files/WhatsAppImage2025-04-16at19.36.34_720x.jpg?v=1744874103',
-                    stock_quantity: 10
-                },
-                {
-                    book_id: 2,
-                    title: 'Mala',
-                    author: 'Nimra Ahmed',
-                    price: 1500.00,
-                    cover_image_url: 'https://zanjabeelbookstore.com/cdn/shop/files/KHA00445_de16d2e2-622b-4846-ad84-37f1e444fe8f_720x.jpg?v=1737531798',
-                    stock_quantity: 10
-                }
-            ];
+            this.books = []; // Empty array if API fails
         }
     }
 
-    // Add item to cart
     addToCart(bookId, quantity = 1) {
         const book = this.books.find(b => b.book_id === bookId);
         if (!book) {
@@ -166,7 +147,6 @@ class BookstoreCart {
                     </div>
                     <div class="item-details">
                         <div class="item-name">${item.title}</div>
-                        <div class="item-author" style="font-size: 12px; color: #888;">by ${item.author}</div>
                         <div class="item-price">Rs${item.price.toFixed(2)}</div>
                         <div class="quantity-controls">
                             <button class="qty-btn" onclick="cart.updateQuantity(${item.book_id}, -1)">-</button>
@@ -197,7 +177,7 @@ class BookstoreCart {
         document.getElementById('cartTotal').textContent = `Rs${total.toFixed(2)}`;
     }
 
-    // CHECKOUT METHOD - UPDATED FOR MONGODB BACKEND
+    // CHECKOUT METHOD
     async checkout() {
         if (this.cartItems.length === 0) {
             alert('Your cart is empty!');
@@ -264,8 +244,6 @@ class BookstoreCart {
 // Initialize cart system
 const cart = new BookstoreCart();
 
-// EXISTING FUNCTIONS - UNCHANGED
-
 // Open cart sidebar
 function openCart() {
     const sidebar = document.getElementById('cartSidebar');
@@ -288,31 +266,27 @@ function closeCart() {
     document.body.style.overflow = 'auto';
 }
 
-// Updated openView function
+// UPDATED openView function - now accepts bookId instead of title
 let currentBook = {};
 
-function openView(title, imageSrc, price, author, description) {
-    // Find the book in our database
-    const book = cart.books.find(b => b.title === title);
-    if (book) {
-        currentBook = book;
-    } else {
-        // Fallback for hardcoded data
-        currentBook = { 
-            book_id: title === 'Jannat Kai Pattay' ? 1 : 2,
-            title, 
-            cover_image_url: imageSrc, 
-            price: parseFloat(price.replace('Rs ', '').replace(',', '')), 
-            author 
-        };
+function openView(bookId,bookTitle, imageSrc, price, author, description) {
+    // Find the book in our database using book_id
+    const book = cart.books.find(b => b.book_id === bookId);
+    
+    if (!book) {
+        alert('Book not found in database!');
+        return;
     }
     
-    // Update modal content
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('modalAuthor').textContent = `بذریعہ:${author}`;
-    document.getElementById('modalPrice').textContent = price;
+    currentBook = book;
+    
+    // Update modal content - use database data for title
+    document.getElementById('modalId').textContent = book.Id;
+    document.getElementById('modalTitle').textContent = book.title;
+    document.getElementById('modalAuthor').textContent = `بذریعہ: ${book.author}`;
+    document.getElementById('modalPrice').textContent = `Rs ${book.price}`;
     document.getElementById('modalDescription').textContent = description;
-    document.getElementById('modalBookImage').src = imageSrc;
+    document.getElementById('modalBookImage').src = book.cover_image_url;
     
     // Show modal
     const modal = document.getElementById('bookModal');
